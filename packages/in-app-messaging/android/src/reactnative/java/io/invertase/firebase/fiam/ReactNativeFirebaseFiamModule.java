@@ -18,6 +18,7 @@ package io.invertase.firebase.fiam;
  */
 
 import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactMethod;
 import io.invertase.firebase.common.ReactNativeFirebaseModule;
@@ -26,10 +27,17 @@ import java.util.Map;
 public class ReactNativeFirebaseFiamModule extends ReactNativeFirebaseModule {
   private static final String SERVICE_NAME = "Fiam";
   private final UniversalFirebaseFiamModule module;
+  private ReactApplicationContext reactContext;
+  ReactNativeFirebaseFiamModule(ReactApplicationContext _reactContext) {
+    super(_reactContext, SERVICE_NAME);
+    reactContext = _reactContext;
+    module = new UniversalFirebaseFiamModule(_reactContext, SERVICE_NAME);
+  }
 
-  ReactNativeFirebaseFiamModule(ReactApplicationContext reactContext) {
-    super(reactContext, SERVICE_NAME);
-    module = new UniversalFirebaseFiamModule(reactContext, SERVICE_NAME);
+  @ReactMethod
+  public void addOnMessageHandler(String eventName) {
+    ReactNativeFirebaseFiamClickListener listener = new ReactNativeFirebaseFiamClickListener(reactContext, eventName);
+    module.addOnClickListener(listener);
   }
 
   @ReactMethod

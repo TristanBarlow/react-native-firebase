@@ -21,6 +21,7 @@ import {
   FirebaseModule,
   getFirebaseRoot,
 } from '@react-native-firebase/app/lib/internal';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 import version from './version';
 
 const statics = {};
@@ -42,6 +43,15 @@ class FirebaseFiamModule extends FirebaseModule {
 
   get isAutomaticDataCollectionEnabled() {
     return this._isAutomaticDataCollectionEnabled;
+  }
+
+  addOnMessageHandler() {
+    console.log('On message', NativeModules);
+    const eventEmitter = new NativeEventEmitter(NativeModules.ToastExample);
+    this.eventListener = eventEmitter.addListener('EventReminder', event => {
+      console.log(event);
+    });
+    this.native.addOnMessageHandler('EventReminder');
   }
 
   setMessagesDisplaySuppressed(enabled) {

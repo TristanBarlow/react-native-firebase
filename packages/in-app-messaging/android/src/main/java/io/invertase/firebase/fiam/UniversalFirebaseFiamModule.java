@@ -22,6 +22,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.inappmessaging.FirebaseInAppMessaging;
 import io.invertase.firebase.common.UniversalFirebaseModule;
+import com.google.firebase.inappmessaging.FirebaseInAppMessaging;
+import com.google.firebase.inappmessaging.FirebaseInAppMessagingClickListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +31,10 @@ public class UniversalFirebaseFiamModule extends UniversalFirebaseModule {
 
   UniversalFirebaseFiamModule(Context context, String serviceName) {
     super(context, serviceName);
+  }
+
+  void addOnClickListener(FirebaseInAppMessagingClickListener listener) {
+    FirebaseInAppMessaging.getInstance().addClickListener(listener);
   }
 
   Task<Void> setAutomaticDataCollectionEnabled(Boolean enabled) {

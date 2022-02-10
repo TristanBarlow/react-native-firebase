@@ -102,6 +102,11 @@ export namespace FirebaseInAppMessagingTypes {
     setMessagesDisplaySuppressed(enabled: boolean): Promise<null>;
 
     /**
+     * Enable or disable suppression of Firebase In App Messaging messages.
+     */
+    addOnMessageHandler(): Promise<null>;
+
+    /**
      * Determines whether automatic data collection is enabled or not.
      *
      * #### Example
