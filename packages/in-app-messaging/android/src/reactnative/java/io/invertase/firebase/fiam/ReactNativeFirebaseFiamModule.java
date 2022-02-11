@@ -21,6 +21,7 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import io.invertase.firebase.common.ReactNativeFirebaseModule;
 import java.util.Map;
 
@@ -28,16 +29,41 @@ public class ReactNativeFirebaseFiamModule extends ReactNativeFirebaseModule {
   private static final String SERVICE_NAME = "Fiam";
   private final UniversalFirebaseFiamModule module;
   private ReactApplicationContext reactContext;
-  ReactNativeFirebaseFiamModule(ReactApplicationContext _reactContext) {
-    super(_reactContext, SERVICE_NAME);
-    reactContext = _reactContext;
-    module = new UniversalFirebaseFiamModule(_reactContext, SERVICE_NAME);
+  private ReactNativeFirebaseFiamClickListener clickListener;
+  ReactNativeFirebaseFiamModule(ReactApplicationContext reactContext) {
+    super(reactContext, SERVICE_NAME);
+    this.reactContext = reactContext;
+    module = new UniversalFirebaseFiamModule(reactContext, SERVICE_NAME);
   }
 
   @ReactMethod
-  public void addOnMessageHandler(String eventName) {
-    ReactNativeFirebaseFiamClickListener listener = new ReactNativeFirebaseFiamClickListener(reactContext, eventName);
-    module.addOnClickListener(listener);
+  public void addClickListener(String eventName, Promise promise) {
+    clickListener = new ReactNativeFirebaseFiamClickListener(reactContext, eventName);
+    module
+        .addClickListener(clickListener)
+        .addOnCompleteListener(
+            task -> {
+              if (task.isSuccessful()) {
+                promise.resolve(task.getResult());
+              } else {
+                rejectPromiseWithExceptionMap(promise, task.getException());
+              }
+            });
+  }
+
+  @ReactMethod
+  public void removeClickListener(Promise promise) {
+    if(clickListener == null) return;
+    module
+        .removeClickListener(clickListener)
+        .addOnCompleteListener(
+            task -> {
+              if (task.isSuccessful()) {
+                promise.resolve(task.getResult());
+              } else {
+                rejectPromiseWithExceptionMap(promise, task.getException());
+              }
+            });
   }
 
   @ReactMethod

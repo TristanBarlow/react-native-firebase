@@ -21,7 +21,7 @@ import {
   FirebaseModule,
   getFirebaseRoot,
 } from '@react-native-firebase/app/lib/internal';
-import { NativeEventEmitter, NativeModules } from 'react-native';
+import { NativeEventEmitter } from 'react-native';
 import version from './version';
 
 const statics = {};
@@ -29,8 +29,10 @@ const statics = {};
 const namespace = 'inAppMessaging';
 
 const nativeModuleName = 'RNFBFiamModule';
-
+const clickListenerName = `${namespace}-clickListener`;
 class FirebaseFiamModule extends FirebaseModule {
+  clickSubscriptions = [];
+
   constructor(...args) {
     super(...args);
     this._isMessagesDisplaySuppressed = this.native.isMessagesDisplaySuppressed;
@@ -45,13 +47,34 @@ class FirebaseFiamModule extends FirebaseModule {
     return this._isAutomaticDataCollectionEnabled;
   }
 
-  addOnMessageHandler() {
-    console.log('On message', NativeModules);
-    const eventEmitter = new NativeEventEmitter(NativeModules.ToastExample);
-    this.eventListener = eventEmitter.addListener('EventReminder', event => {
-      console.log(event);
+  get eventEmitter() {
+    return this._eventEmitter || (this._eventEmitter = new NativeEventEmitter());
+  }
+
+  addClickListener(listener) {
+    listener({ test: 'true' });
+    const subscription = this.eventEmitter.addListener(clickListenerName, listener);
+    if (!this.clickSubscriptions.length) {
+      console.log('ADDING LISTENER');
+      this.native.addClickListener(clickListenerName);
+    }
+    this.clickSubscriptions.push(subscription);
+    return () => {
+      console.log('REMOVING LISTENER');
+      this.clickSubscriptions = this.clickSubscriptions.filter(sub => sub !== subscription);
+      subscription();
+      if (!this.clickSubscriptions.length) {
+        this.native.removeClickListener();
+      }
+    };
+  }
+
+  removeClickListeners() {
+    this.clickSubscriptions.forEach(sub => {
+      sub();
     });
-    this.native.addOnMessageHandler('EventReminder');
+    this.clickSubscriptions = [];
+    return this.native.removeClickListener();
   }
 
   setMessagesDisplaySuppressed(enabled) {

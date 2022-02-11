@@ -6,6 +6,9 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.google.firebase.inappmessaging.model.Action;
 import com.google.firebase.inappmessaging.model.CampaignMetadata;
 import com.google.firebase.inappmessaging.model.InAppMessage;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
+import java.util.Map;
 
 public class ReactNativeFirebaseFiamClickListener implements FirebaseInAppMessagingClickListener {
     ReactApplicationContext reactContext;
@@ -19,19 +22,24 @@ public class ReactNativeFirebaseFiamClickListener implements FirebaseInAppMessag
     public void messageClicked(InAppMessage inAppMessage, Action action) {
         String url = action.getActionUrl();
 
+        WritableMap campaignData = Arguments.createMap();
         CampaignMetadata metadata = inAppMessage.getCampaignMetadata();
+        campaignData.putBoolean("isTestMessage", metadata.getIsTestMessage());
+        campaignData.putString("campaignName", metadata.getCampaignName());	
+        campaignData.putString("campaignId", metadata.getCampaignId());	
 
+        WritableMap messageData = Arguments.createMap();
+        Map<String, String> dataMap = inAppMessage.getData();
+        for (String key : dataMap.keySet()) {
+           messageData.putString(key, dataMap.get(key));
+        }
+
+        WritableMap out = Arguments.createMap();
+        out.putString("url", url);
+        out.putMap("campaignData", campaignData);
+        out.putMap("messageData", messageData);
         reactContext
           .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-          .emit(eventName, "FOO");
-        reactContext
-          .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-          .emit(eventName, url);
-        reactContext
-          .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-          .emit(eventName, "BAR");
-        reactContext
-          .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-          .emit(eventName, "SHO");
+          .emit(eventName, out);
     }
 }

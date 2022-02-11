@@ -59,6 +59,19 @@ export namespace FirebaseInAppMessagingTypes {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface Statics {}
 
+  export interface InAppMessageCampaignData {
+    isTestMessage: boolean;
+    campaignName: string;
+    campaignId: number;
+  }
+
+  export interface InAppMessageClickData {
+    url: string;
+    campaignData: InAppMessageCampaignData;
+    messageData: Record<string, string>;
+  }
+
+  export type InAppMessageOnClickEvent = (data: InAppMessageClickData) => void;
   /**
    * The Firebase In-App Messaging service interface.
    *
@@ -104,8 +117,8 @@ export namespace FirebaseInAppMessagingTypes {
     /**
      * Enable or disable suppression of Firebase In App Messaging messages.
      */
-    addOnMessageHandler(): Promise<null>;
-
+    addClickListener(listener: InAppMessageOnClickEvent): Promise<null>;
+    removeClickListeners();
     /**
      * Determines whether automatic data collection is enabled or not.
      *

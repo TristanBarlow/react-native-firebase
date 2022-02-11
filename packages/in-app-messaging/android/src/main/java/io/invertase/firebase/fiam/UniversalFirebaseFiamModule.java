@@ -28,13 +28,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UniversalFirebaseFiamModule extends UniversalFirebaseModule {
-
   UniversalFirebaseFiamModule(Context context, String serviceName) {
     super(context, serviceName);
   }
 
-  void addOnClickListener(FirebaseInAppMessagingClickListener listener) {
-    FirebaseInAppMessaging.getInstance().addClickListener(listener);
+  Task<Void> addClickListener(FirebaseInAppMessagingClickListener listener) {
+     return Tasks.call(
+        () -> {
+        FirebaseInAppMessaging.getInstance().addClickListener(listener);
+        return null;
+    });
+  }
+
+  Task<Void> removeClickListener(FirebaseInAppMessagingClickListener listener) {
+     return Tasks.call(
+        () -> {
+        FirebaseInAppMessaging.getInstance().removeClickListener(listener);
+        return null;
+    });
   }
 
   Task<Void> setAutomaticDataCollectionEnabled(Boolean enabled) {
